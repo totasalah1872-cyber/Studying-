@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Notes AD — نسخة نهائية قابلة للاختيار</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#101216;--panel:#0d1113;--paper:#fbfcfe;--muted:#9aa4ad;--accent:#06c2b1}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;direction:rtl;background:var(--bg);color:#e6f0f6}
+.app{min-height:100vh;padding:12px;display:flex;flex-direction:column;gap:10px}
+
+/* top bar */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03)}
+.left-controls{display:flex;align-items:center;gap:8px}
+.icon-btn{width:40px;height:40px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.file-title{font-weight:700;color:#dff6fb;margin-right:8px}
+
+/* tabs */
+.tabs{display:flex;gap:8px;justify-content:center;margin-top:6px}
+.tab{padding:8px 14px;border-radius:999px;background:#26262a;color:var(--muted);cursor:pointer;font-weight:600;border:1px solid rgba(255,255,255,0.02)}
+.tab.active{background:var(--accent);color:#012}
+
+/* pen row */
+.pen-row{display:flex;align-items:center;gap:10px;padding:10px;background:var(--panel);border-radius:10px;margin:8px 0;border:1px solid rgba(255,255,255,0.02)}
+.pen-slot{width:44px;height:44px;border-radius:8px;background:transparent;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.02);cursor:pointer}
+
+/* viewer */
+.viewer{flex:1;display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}
+.paper{width:880px;background:var(--paper);border-radius:8px;box-shadow:0 26px 80px rgba(0,0,0,0.6);padding:12px;position:relative}
+.page-img{width:100%;border-radius:6px;display:block}
+
+/* pencil kit popover */
+.pencil-btn{position:absolute;right:-56px;top:18px;width:44px;height:44px;border-radius:10px;background:var(--panel);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+.popover{position:absolute;right:-340px;top:60px;width:320px;background:linear-gradient(180deg,#0d1112,#0b0f12);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 20px 60px rgba(0,0,0,0.6);display:none;z-index:90;color:#e7f7fb}
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tool-card{background:#101418;border-radius:10px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.02);min-height:84px}
+.tool-card img{width:64px;height:64px;object-fit:cover;border-radius:8px}
+
+/* settings panel */
+.settings{position:fixed;left:20px;top:80px;width:320px;background:#0f1416;border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.03);color:var(--muted);display:none;z-index:120}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.02)}
+
+/* side small panels */
+.side-panel{position:fixed;right:24px;top:120px;width:260px;background:#0f1416;border-radius:12px;padding:10px;border:1px solid rgba(255,255,255,0.03);display:none;color:var(--muted);z-index:80}
+
+/* small controls */
+.controls{position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:8px}
+.controls .icon-btn{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+
+/* footer */
+.footer{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;padding-top:8px}
+
+/* responsive */
+@media (max-width:1000px){ .paper{width:94%} .popover{right:12px;top:120px} .settings{left:12px} .side-panel{right:12px} }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="left-controls">
+      <button class="icon-btn" id="btnBack" title="رجوع"><img id="iconBack" src="/mnt/data/28A04F33-96B1-4DCF-A8E5-4F8CBC01C6A5.jpeg" style="width:18px;height:18px;object-fit:cover;border-radius:3px"></button>
+      <button class="icon-btn" id="btnList" title="قائمة"><img id="iconList" src="/mnt/data/7C27E71A-7B94-4361-9B17-D0F8ED549601.jpeg" style="width:18px;height:18px;object-fit:cover;border-radius:3px"></button>
+    </div>
+
+    <div class="file-title">Notes AD</div>
+
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+      <button class="icon-btn" id="btnMic" title="ميكروفون"><img id="iconMic" src="/mnt/data/8696753F-344A-47F3-BCF6-CA883CF788EE.jpeg" style="width:18px;height:18px;object-fit:cover;border-radius:3px"></button>
+      <button class="icon-btn" id="btnVideo" title="إدراج فيديو"><img id="iconVideo" src="/mnt/data/81120FA2-0DF7-4160-A622-514DCF249712.jpeg" style="width:18px;height:18px;object-fit:cover;border-radius:3px"></button>
+      <button class="icon-btn" id="btnChat" title="ChatGPT"><img id="iconChat" src="/mnt/data/8696753F-344A-47F3-BCF6-CA883CF788EE.jpeg" style="width:18px;height:18px;object-fit:cover;border-radius:3px"></button>
+      <button class="icon-btn" id="btnSettings" title="الإعدادات">⚙️</button>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <div class="tab active">الرئيسية</div>
+    <div class="tab">النوتس</div>
+    <div class="tab">الملخصات</div>
+    <div class="tab">البوربوينت</div>
+    <div class="tab">الواجبات</div>
+    <div class="tab">الوسائط</div>
+    <div class="tab">البحث</div>
+    <div class="tab">AI</div>
+  </div>
+
+  <div class="pen-row">
+    <div class="pen-slot" data-icon="img1"><img class="pen-icon" src="/mnt/data/8696753F-344A-47F3-BCF6-CA883CF788EE.jpeg" style="width:22px;height:28px;object-fit:cover;border-radius:3px"></div>
+    <div class="pen-slot" data-icon="img2"><img class="pen-icon" src="/mnt/data/28A04F33-96B1-4DCF-A8E5-4F8CBC01C6A5.jpeg" style="width:22px;height:28px;object-fit:cover;border-radius:3px"></div>
+    <div class="pen-slot" data-icon="img3"><img class="pen-icon" src="/mnt/data/7C27E71A-7B94-4361-9B17-D0F8ED549601.jpeg" style="width:22px;height:28px;object-fit:cover;border-radius:3px"></div>
+    <div style="flex:1"></div>
+    <div class="pen-slot" data-icon="cap1"><img class="pen-icon" src="/mnt/data/8696753F-344A-47F3-BCF6-CA883CF788EE.jpeg" style="width:20px;height:20px;object-fit:cover;border-radius:3px"></div>
+    <div class="pen-slot" data-icon="cap2"><img class="pen-icon" src="/mnt/data/28A04F33-96B1-4DCF-A8E5-4F8CBC01C6A5.jpeg" style="width:20px;height:20px;object-fit:cover;border-radius:3px"></div>
+    <div class="pen-slot" data-icon="cap3"><img class="pen-icon" src="/mnt/data/7C27E71A-7B94-4361-9B17-D0F8ED549601.jpeg" style="width:20px;height:20px;object-fit:cover;border-radius:3px"></div>
+  </div>
+
+  <div class="viewer">
+    <div class="paper">
+      <button class="pencil-btn" id="pencilBtn" title="Pencil Kit"><img id="pencilIcon" src="/mnt/data/28A04F33-96B1-4DCF-A8E5-4F8CBC01C6A5.jpeg" style="width:18px;height:18px;object-fit:cover;border-radius:3px"></button>
+      <div class="controls">
+        <button class="icon-btn" id="undo"><img id="undoI" src="/mnt/data/8696753F-344A-47F3-BCF6-CA883CF788EE.jpeg" style="width:14px;height:14px;object-fit:cover;border-radius:2px"></button>
+        <button class="icon-btn" id="redo"><img id="redoI" src="/mnt/data/7C27E71A-7B94-4361-9B17-D0F8ED549601.jpeg" style="width:14px;height:14px;object-fit:cover;border-radius:2px"></button>
+      </div>
+
+      <img class="page-img" src="/mnt/data/81120FA2-0DF7-4160-A622-514DCF249712.jpeg" alt="page">
+
+      <div class="popover" id="pencilKit">
+        <h4>Pencil Kit</h4>
+        <div class="tools-grid" id="toolsGrid">
+          <!-- tool cards inserted by JS -->
+        </div>
+        <div style="margin-top:8px;text-align:left"><button id="closeKit" style="background:#06c2b1;border:none;padding:8px;border-radius:8px;color:#012">إغلاق</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings" id="settingsPanel">
+    <h4 style="margin:0 0 8px 0;color:#e7f7fb">الإعدادات</h4>
+    <div class="setting-row">
+      <div>نوع الأيقونات</div>
+      <div>
+        <select id="iconChoice">
+          <option value="fromImage">من الصورة (نسخة طبق الأصل)</option>
+          <option value="svg">أيقونات SVG بسيطة</option>
+        </select>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div>لوّن تبويب نشط</div>
+      <input type="color" id="accentColor" value="#06c2b1">
+    </div>
+    <div style="margin-top:8px">
+      <button id="closeSettings" style="background:#06c2b1;border:none;padding:8px;border-radius:8px;color:#012">حفظ وإغلاق</button>
+    </div>
+  </div>
+
+  <div class="side-panel" id="timerPanel">
+    <div class="small">تايمر</div>
+  </div>
+
+  <div class="footer">
+    <div>Notes AD • واجهة</div>
+    <div>نسخة العرض — الأيقونات قابلة للتبديل</div>
+  </div>
+</div>
+
+<script>
+// Tool list data (names + images from uploaded files)
+const TOOLS_FROM_IMAGE = [
+  {name:'ChatGPT', img:'/mnt/data/8696753F-344A-47F3-BCF6-CA883CF788EE.jpeg'},
+  {name:'Safari', img:'/mnt/data/28A04F33-96B1-4DCF-A8E5-4F8CBC01C6A5.jpeg'},
+  {name:'Calculator', img:'/mnt/data/7C27E71A-7B94-4361-9B17-D0F8ED549601.jpeg'},
+  {name:'Draft', img:'/mnt/data/8696753F-344A-47F3-BCF6-CA883CF788EE.jpeg'},
+  {name:'Timer', img:'/mnt/data/28A04F33-96B1-4DCF-A8E5-4F8CBC01C6A5.jpeg'},
+  {name:'Stopwatch', img:'/mnt/data/7C27E71A-7B94-4361-9B17-D0F8ED549601.jpeg'},
+  {name:'Clock', img:'/mnt/data/8696753F-344A-47F3-BCF6-CA883CF788EE.jpeg'},
+  {name:'Vanish Pen', img:'/mnt/data/28A04F33-96B1-4DCF-A8E5-4F8CBC01C6A5.jpeg'},
+  {name:'Laser', img:'/mnt/data/7C27E71A-7B94-4361-9B17-D0F8ED549601.jpeg'}
+];
+
+// Simple SVG icons (data URLs)
+const TOOLS_SVG = [
+  {name:'ChatGPT', img: `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="12" width="100%" height="100%" fill="%230a0f12"/><circle cx="32" cy="28" r="12" fill="%2306c2b1"/><rect x="18" y="44" width="28" height="6" fill="%23fff" rx="3"/></svg>')}`},
+  {name:'Safari', img: `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="12" width="100%" height="100%" fill="%231c2b33"/><path d="M16 48 L48 16" stroke="%23ffd86b" stroke-width="4" stroke-linecap="round"/></svg>')}`},
+  {name:'Calculator', img: `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="12" width="100%" height="100%" fill="%23334344"/><rect x="14" y="16" width="36" height="12" fill="%23fff" rx="3"/></svg>')}`},
+  {name:'Draft', img: `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="12" width="100%" height="100%" fill="%23232a31"/><path d="M18 44 L46 20" stroke="%237c5cff" stroke-width="4" stroke-linecap="round"/></svg>')}`},
+  {name:'Timer', img: `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="12" width="100%" height="100%" fill="%231b2b2b"/><circle cx="32" cy="34" r="14" fill="%23ffd86b"/></svg>')}`},
+  {name:'Stopwatch', img: `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="12" width="100%" height="100%" fill="%23343536"/><path d="M30 18 v8 h8" stroke="%2306c2b1" stroke-width="4" stroke-linecap="round"/></svg>')}`},
+  {name:'Clock', img: `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="12" width="100%" height="100%" fill="%23222"/><circle cx="32" cy="32" r="12" fill="%237c5cff"/></svg>')}`},
+  {name:'Vanish Pen', img: `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="12" width="100%" height="100%" fill="%23232b2b"/><path d="M18 46 L46 18" stroke="%23fff" stroke-width="3"/></svg>')}`},
+  {name:'Laser', img: `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="12" width="100%" height="100%" fill="%23333"/><path d="M20 44 L44 20" stroke="%23ff5c6b" stroke-width="4"/></svg>')}`}
+];
+
+const toolsGrid = document.getElementById('toolsGrid');
+const iconChoice = document.getElementById('iconChoice');
+const settingsPanel = document.getElementById('settingsPanel');
+
+// function to render tools based on choice
+function renderTools(choice){
+  toolsGrid.innerHTML = '';
+  const set = choice === 'fromImage' ? TOOLS_FROM_IMAGE : TOOLS_SVG;
+  set.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'tool-card';
+    const img = document.createElement('img');
+    img.src = t.img; img.alt = t.name;
+    const label = document.createElement('div'); label.className = 'tool-label'; label.textContent = t.name;
+    card.appendChild(img); card.appendChild(label);
+    card.addEventListener('click', ()=> alert(t.name + ' (محاكاة اختيار الأداة)'));
+    toolsGrid.appendChild(card);
+  });
+}
+
+// initial render
+renderTools('fromImage');
+
+// pencil kit open
+document.getElementById('pencilBtn').addEventListener('click', ()=> {
+  const kit = document.getElementById('pencilKit');
+  kit.style.display = kit.style.display === 'block' ? 'none' : 'block';
+});
+
+// settings open/close
+document.getElementById('btnSettings').addEventListener('click', ()=> { settingsPanel.style.display = 'block'; });
+document.getElementById('closeSettings').addEventListener('click', ()=> { settingsPanel.style.display = 'none'; applySettings(); });
+
+// apply settings (icon choice + accent color)
+function applySettings(){
+  const choice = iconChoice.value;
+  renderTools(choice);
+  const accent = document.getElementById('accentColor').value;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.tab').classList.add('active');
+  document.documentElement.style.setProperty('--accent', accent);
+}
+
+// accent update live
+document.getElementById('accentColor').addEventListener('input', (e)=> {
+  document.documentElement.style.setProperty('--accent', e.target.value);
+});
+
+// toggle settings on outside click
+document.addEventListener('click', (e)=> {
+  if(!settingsPanel.contains(e.target) && e.target.id !== 'btnSettings'){} 
+});
+
+// tabs visual only
+document.querySelectorAll('.tab').forEach(tab=> tab.addEventListener('click', ()=> {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+}));
+
+// set icons to image or svg for topbar & pen row depending on choice (kept simple: image-set uses uploaded images; svg uses simple placeholders)
+iconChoice.addEventListener('change', ()=> {
+  const v = iconChoice.value;
+  if(v==='fromImage'){
+    // set a few top icons to image versions
+    document.getElementById('iconBack').src = '/mnt/data/28A04F33-96B1-4DCF-A8E5-4F8CBC01C6A5.jpeg';
+    document.getElementById('iconList').src = '/mnt/data/7C27E71A-7B94-4361-9B17-D0F8ED549601.jpeg';
+    document.getElementById('iconMic').src = '/mnt/data/8696753F-344A-47F3-BCF6-CA883CF788EE.jpeg';
+    document.getElementById('iconVideo').src = '/mnt/data/81120FA2-0DF7-4160-A622-514DCF249712.jpeg';
+    document.getElementById('iconChat').src = '/mnt/data/8696753F-344A-47F3-BCF6-CA883CF788EE.jpeg';
+    document.getElementById('pencilIcon').src = '/mnt/data/28A04F33-96B1-4DCF-A8E5-4F8CBC01C6A5.jpeg';
+    document.querySelectorAll('.pen-slot img').forEach((el, idx)=> { el.src = ['/mnt/data/8696753F-344A-47F3-BCF6-CA883CF788EE.jpeg','/mnt/data/28A04F33-96B1-4DCF-A8E5-4F8CBC01C6A5.jpeg','/mnt/data/7C27E71A-7B94-4361-9B17-D0F8ED549601.jpeg'][idx%3]; });
+  } else {
+    // SVG placeholders: using data URLs defined in TOOLS_SVG for consistency
+    document.getElementById('iconBack').src = TOOLS_SVG[1].img;
+    document.getElementById('iconList').src = TOOLS_SVG[0].img;
+    document.getElementById('iconMic').src = TOOLS_SVG[2].img;
+    document.getElementById('iconVideo').src = TOOLS_SVG[3].img;
+    document.getElementById('iconChat').src = TOOLS_SVG[0].img;
+    document.getElementById('pencilIcon').src = TOOLS_SVG[1].img;
+    document.querySelectorAll('.pen-slot img').forEach((el, idx)=> { el.src = TOOLS_SVG[idx%TOOLS_SVG.length].img; });
+  }
+  renderTools(iconChoice.value);
+});
+
+// close popover when clicking outside
+document.addEventListener('click', (e)=> {
+  const kit = document.getElementById('pencilKit');
+  const pencilBtn = document.getElementById('pencilBtn');
+  if(!kit.contains(e.target) && e.target !== pencilBtn) kit.style.display='none';
+});
+
+</script>
+</body>
+</html>
